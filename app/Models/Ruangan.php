@@ -20,16 +20,15 @@ class Ruangan extends Model
     ];
 
     public function peminjamans()
-{
-    return $this->hasMany(Peminjaman::class);
-}
+    {
+        return $this->hasMany(Peminjaman::class);
+    }
 
-public function jadwalRegulers()
-{
-    return $this->hasMany(JadwalReguler::class);
-}
+    public function jadwalRegulers()
+    {
+        return $this->hasMany(JadwalReguler::class);
+    }
 
-    // Cek ketersediaan untuk jadwal reguler
     public function isAvailableForRegular($hari, $sesi)
     {
         return !$this->jadwalRegulers()
@@ -38,42 +37,35 @@ public function jadwalRegulers()
             ->exists();
     }
 
-    // Cek ketersediaan untuk peminjaman
     public function isAvailableForBooking($tanggal, $sesi)
-{
-    // Cek bentrok jadwal reguler
-    $hari = \Carbon\Carbon::parse($tanggal)->translatedFormat('l');
-
-    $hariMap = [
-        'Monday' => 'Senin',
-        'Tuesday' => 'Selasa',
-        'Wednesday' => 'Rabu',
-        'Thursday' => 'Kamis',
-        'Friday' => 'Jumat',
-    ];
-
-    $hariIndo = $hariMap[$hari] ?? null;
-
-    $bentrokReguler = $this->jadwalRegulers()
-        ->where('hari', $hariIndo)
-        ->where('sesi', $sesi)
-        ->exists();
-
-    if ($bentrokReguler) {
-        return false;
+    {
+        // Cek bentrok dengan jadwal reguler
+        $hari = \Carbon\Carbon::parse($tanggal)->isoFormat('dddd');
+        $hariIndonesia = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu',
+        ];
+        
+        $hari = $hariIndonesia[$hari] ?? null;
+        
+        if ($hari === null || $hari === 'Sabtu' || $hari === 'Minggu') {
+            return false; // Tidak ada jadwal reguler di akhir pekan
+        }
+        
+        if ($this->jadwalRegulers()->where('hari', $hari)->where('sesi', $sesi)->exists()) {
+            return false;
+        }
+        
+        // Cek bentrok dengan peminjaman lain yang disetujui
+        return !$this->peminjamans()
+            ->where('status', 'disetujui')
+            ->where('tanggal', $tanggal)
+            ->where('sesi', $sesi)
+            ->exists();
     }
-
-    // Cek bentrok peminjaman lain
-    $bentrokPinjam = $this->peminjamans()
-        ->where('tanggal', $tanggal)
-        ->where('sesi', $sesi)   // <── WAJIB ADA!
-        ->where('status', 'disetujui')
-        ->exists();
-
-    if ($bentrokPinjam) {
-        return false;
-    }
-
-    return true;
-}
 }

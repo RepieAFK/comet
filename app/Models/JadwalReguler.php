@@ -17,6 +17,11 @@ class JadwalReguler extends Model
         'user_id',
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function ruangan()
     {
         return $this->belongsTo(Ruangan::class);

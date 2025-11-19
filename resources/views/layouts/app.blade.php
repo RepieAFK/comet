@@ -969,12 +969,14 @@
                             </a>
                         </li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('jadwal_reguler.*') ? 'active' : '' }}" href="{{ route('jadwal_reguler.index') }}">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Jadwal Reguler</span>
-                            </a>
-                        </li>
+                        @if(auth()->user()->isAdmin() || auth()->user()->isPetugas())
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('jadwal_reguler.*') ? 'active' : '' }}" href="{{ route('jadwal_reguler.index') }}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Jadwal Reguler</span>
+        </a>
+    </li>
+@endif
                         
                         @if(auth()->user()->isAdmin() || auth()->user()->isPetugas())
                             <li class="nav-item">

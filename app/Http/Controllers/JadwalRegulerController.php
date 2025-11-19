@@ -19,30 +19,12 @@ class JadwalRegulerController extends Controller
     $ruangans = Ruangan::with('jadwalRegulers')->get();
     $hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
     $sesi = range(1, 12);
+    
+    // Get all jadwal reguler records
+    $jadwalReguler = JadwalReguler::with('ruangan')->get();
 
-    // Jadwal reguler
-    $jadwalRegulers = JadwalReguler::with('ruangan')->get()
-        ->keyBy(function($item) {
-            return $item->ruangan_id . '-' . $item->hari . '-' . $item->sesi;
-        });
-
-    // Tambahkan peminjaman yang disetujui
-    $peminjamans = \App\Models\Peminjaman::with(['ruangan', 'user'])
-        ->where('status', 'disetujui')
-        ->get()
-        ->keyBy(function($item) {
-            return $item->ruangan_id . '-' . $item->tanggal . '-' . $item->sesi;
-        });
-
-    return view('jadwal.reguler_index', compact(
-        'ruangans',
-        'hari',
-        'sesi',
-        'jadwalRegulers',
-        'peminjamans'
-    ));
+    return view('jadwal.reguler_index', compact('ruangans', 'hari', 'sesi', 'jadwalReguler'));
 }
-
 
     public function create()
     {
@@ -75,7 +57,7 @@ class JadwalRegulerController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('jadwal.reguler_index')->with('success', 'Jadwal reguler berhasil ditambahkan.');
+        return redirect()->route('jadwal_reguler.index')->with('success', 'Jadwal reguler berhasil ditambahkan.');
     }
 
     public function edit(JadwalReguler $jadwalReguler)
@@ -111,12 +93,12 @@ class JadwalRegulerController extends Controller
 
         $jadwalReguler->update($request->all());
 
-        return redirect()->route('jadwal.reguler.index')->with('success', 'Jadwal reguler berhasil diperbarui.');
+        return redirect()->route('jadwal_reguler.index')->with('success', 'Jadwal reguler berhasil diperbarui.');
     }
 
     public function destroy(JadwalReguler $jadwalReguler)
     {
         $jadwalReguler->delete();
-        return redirect()->route('jadwal.reguler.index')->with('success', 'Jadwal reguler berhasil dihapus.');
+        return redirect()->route('jadwal_reguler.index')->with('success', 'Jadwal reguler berhasil dihapus.');
     }
 }

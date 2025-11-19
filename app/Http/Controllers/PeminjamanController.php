@@ -45,37 +45,44 @@ class PeminjamanController extends Controller
 
     public function store(Request $request)
 {
-    // Hanya peminjam yang bisa mengajukan
     if (!Auth::user()->isPeminjam()) {
-        abort(403, 'Unauthorized action.'); // Cek ini
+        abort(403, 'Unauthorized action.');
     }
     
     $request->validate([
         'ruangan_id' => 'required|exists:ruangans,id',
         'tanggal' => 'required|date|after_or_equal:today',
-        'sesi' => 'required|integer|min:1|max:12',
+        'sesi' => 'required|array|min:1', // Validasi sebagai array
+        'sesi.*' => 'integer|between:1,12', // Validasi setiap elemen array
         'keperluan' => 'required|string|max:1000',
     ]);
 
     $ruangan = Ruangan::findOrFail($request->ruangan_id);
+    $tanggal = $request->tanggal;
+    $sesiList = $request->sesi;
 
-if (!$ruangan->isAvailableForBooking($request->tanggal, $request->sesi)) {
-    return back()
-        ->with('error', 'Ruangan sudah dipinjam pada sesi tersebut.')
-        ->withInput();
-}
+    // Cek ketersediaan untuk setiap sesi
+    foreach ($sesiList as $sesi) {
+        if (!$ruangan->isAvailableForBooking($tanggal, $sesi)) {
+            return back()->withInput()->with('error', "Ruangan tidak tersedia pada Sesi {$sesi}. Jadwal mungkin bentrok.");
+        }
+    }
 
+    // Buat peminjaman untuk setiap sesi yang dipilih
+    $peminjamanIds = [];
+    foreach ($sesiList as $sesi) {
+        $peminjaman = Peminjaman::create([
+            'user_id' => Auth::id(),
+            'ruangan_id' => $request->ruangan_id,
+            'tanggal' => $tanggal,
+            'sesi' => $sesi,
+            'keperluan' => $request->keperluan,
+            'status' => 'menunggu',
+        ]);
+        $peminjamanIds[] = $peminjaman->id;
+    }
 
-    Peminjaman::create([
-        'user_id' => Auth::id(),
-        'ruangan_id' => $request->ruangan_id,
-        'tanggal' => $request->tanggal,
-        'sesi' => $request->sesi,
-        'keperluan' => $request->keperluan,
-        'status' => 'menunggu',
-    ]);
-
-    return redirect()->route('peminjaman.index')->with('success', 'Pengajuan peminjaman berhasil dikirim.');
+    return redirect()->route('peminjaman.index')->with('success', 'Pengajuan peminjaman berhasil dikirim untuk ' . count($peminjamanIds) . ' sesi.');
 }
 
     public function show(Peminjaman $peminjaman)

@@ -75,7 +75,7 @@
                                 @foreach($recentPeminjaman as $peminjaman)
                                     <tr>
                                         <td>{{ $peminjaman->ruangan->nama_ruangan }}</td>
-                                        <td>{{ $peminjaman->waktu_mulai->format('d M Y') }}</td>
+                                        <td>{{ $peminjaman->created_at ? $peminjaman->created_at->format('Y-m-d H:i:s') : 'N/A' }}</td>
                                         <td>
                                             <span class="status-badge status-{{ $peminjaman->status }}">
                                                 {{ ucfirst($peminjaman->status) }}

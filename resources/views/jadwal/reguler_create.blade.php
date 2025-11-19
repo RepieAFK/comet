@@ -25,7 +25,7 @@
                             @endforeach
                         </select>
                         @error('ruangan_id')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                             @endforeach
                         </select>
                         @error('hari')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                             @endforeach
                         </select>
                         @error('sesi')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
@@ -62,11 +62,12 @@
                 <label for="kegiatan" class="form-label">Kegiatan</label>
                 <input type="text" class="form-control @error('kegiatan') is-invalid @enderror" name="kegiatan" value="{{ old('kegiatan') }}" placeholder="Contoh: Matematika Dasar" required>
                 @error('kegiatan')
-                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+            
             <div class="d-flex justify-content-end">
-                <a href="{{ route('jadwal.index') }}" class="btn btn-secondary me-2">Batal</a>
+                <a href="{{ route('jadwal_reguler.index') }}" class="btn btn-secondary me-2">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
         </form>
