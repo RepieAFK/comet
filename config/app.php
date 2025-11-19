@@ -165,8 +165,6 @@ return [
         /*
          * Package Service Providers...
          */
-        Maatwebsite\Excel\ExcelServiceProvider::class, // <-- Provider ditambahkan
-
         /*
          * Application Service Providers...
          */
